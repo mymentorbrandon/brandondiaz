@@ -169,10 +169,10 @@ const GlitchText = (() => {
   return { glitch, initGlitchLoop };
 })();
 
-// Konami-style Easter Egg — type "DIAZ" anywhere to trigger hidden message
+// Konami-style Easter Egg — type "Jesus" anywhere to trigger hidden message
 const SecretCode = (() => {
   let typed = '';
-  const secret = 'DIAZ';
+  const secret = 'JESUS';
 
   function init() {
     document.addEventListener('keyup', (e) => {
