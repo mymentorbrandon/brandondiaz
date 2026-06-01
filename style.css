@@ -477,3 +477,439 @@ footer p {
   .nav-links { display: none; }
   .hero-name { font-size: clamp(4rem, 20vw, 7rem); }
 }
+/* ── PORTAL V3 UPGRADES ── */
+/* Find the existing portal CSS in style.css and replace it entirely with this */
+
+.portal-warning-top {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: #ff4444;
+  letter-spacing: 0.2em;
+  margin-bottom: 4rem;
+  animation: flicker 3s infinite;
+}
+
+.portals-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 4rem;
+  margin-top: 2rem;
+  align-items: start;
+}
+
+.portal-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  gap: 0;
+}
+
+/* ── CAUTION TAPE — FIXED ── */
+.caution-tape {
+  width: 115%;
+  padding: 6px 0;
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.15em;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  font-weight: bold;
+  z-index: 10;
+  position: relative;
+  line-height: 1.4;
+}
+
+/* Portal 1 — tilted left on top, right on bottom */
+.portal-wrapper:nth-child(1) .caution-top {
+  transform: rotate(-2.5deg);
+  margin-bottom: -3px;
+}
+.portal-wrapper:nth-child(1) .caution-bottom {
+  transform: rotate(-1deg);
+  margin-top: -3px;
+}
+
+/* Portal 2 — nearly flat on top, steep tilt bottom */
+.portal-wrapper:nth-child(2) .caution-top {
+  transform: rotate(0.5deg);
+  margin-bottom: -3px;
+}
+.portal-wrapper:nth-child(2) .caution-bottom {
+  transform: rotate(3deg);
+  margin-top: -3px;
+}
+
+/* Portal 3 — steep left tilt top, flat bottom */
+.portal-wrapper:nth-child(3) .caution-top {
+  transform: rotate(-1deg);
+  margin-bottom: -3px;
+}
+.portal-wrapper:nth-child(3) .caution-bottom {
+  transform: rotate(2deg);
+  margin-top: -3px;
+}
+
+.caution-top {
+  background: repeating-linear-gradient(
+    90deg,
+    #ffdd00 0px, #ffdd00 30px,
+    #111100 30px, #111100 60px
+  );
+  color: #111100;
+  text-shadow: none;
+}
+
+.caution-bottom {
+  background: repeating-linear-gradient(
+    90deg,
+    #ffdd00 0px, #ffdd00 30px,
+    #111100 30px, #111100 60px
+  );
+  color: #111100;
+}
+
+.caution-bio {
+  background: repeating-linear-gradient(
+    90deg,
+    #22ee22 0px, #22ee22 30px,
+    #001100 30px, #001100 60px
+  ) !important;
+  color: #001100 !important;
+}
+
+.caution-danger {
+  background: repeating-linear-gradient(
+    90deg,
+    #ee2200 0px, #ee2200 30px,
+    #110000 30px, #110000 60px
+  ) !important;
+  color: #ffaa00 !important;
+}
+
+/* ── SIGN 1: MORTY'S SLOPPY WOOD SIGN ── */
+.sign-morty-wrap {
+  align-self: flex-start;
+  display: flex;
+  align-items: flex-end;
+  margin-bottom: -6px;
+  z-index: 10;
+  transform: rotate(4deg);
+}
+
+.sign-morty-post {
+  width: 8px;
+  height: 65px;
+  background: linear-gradient(to bottom, #8B6535, #5a3d15, #3d2a0a);
+  border-radius: 1px 1px 3px 3px;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.sign-morty-post::after {
+  content: '';
+  position: absolute;
+  top: 10px;
+  left: -1px;
+  right: -1px;
+  height: 3px;
+  background: #3d2a0a;
+  border-radius: 1px;
+}
+
+.sign-morty-board {
+  background: linear-gradient(135deg, #8B6535 0%, #6b4a1f 40%, #7a5528 70%, #5a3d15 100%);
+  border: none;
+  padding: 10px 14px;
+  position: relative;
+  max-width: 140px;
+  box-shadow: 3px 3px 8px rgba(0,0,0,0.8), inset 0 0 20px rgba(0,0,0,0.3);
+  transform: rotate(-2deg);
+}
+
+/* Wood grain texture */
+.sign-morty-board::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    92deg,
+    transparent 0px,
+    transparent 8px,
+    rgba(0,0,0,0.08) 8px,
+    rgba(0,0,0,0.08) 9px
+  );
+}
+
+/* Nail holes */
+.sign-morty-board::after {
+  content: '• •';
+  position: absolute;
+  top: 4px;
+  left: 0; right: 0;
+  text-align: center;
+  font-size: 0.4rem;
+  color: rgba(0,0,0,0.5);
+  letter-spacing: 60px;
+}
+
+.sign-morty-text {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.1rem;
+  line-height: 1.15;
+  position: relative;
+  z-index: 1;
+  /* Sloppy green paint */
+  color: #44dd44;
+  text-shadow:
+    1px 1px 0 #22aa22,
+    -1px 0px 0 #33cc33,
+    2px -1px 0 #55ee44,
+    0 2px 4px rgba(0,100,0,0.5);
+  transform: rotate(-1deg);
+  display: block;
+  filter: url(#sloppy);
+}
+
+.sign-morty-text .drip {
+  font-size: 0.5rem;
+  color: #33cc33;
+  display: block;
+  margin-top: -4px;
+  letter-spacing: 0.1em;
+  opacity: 0.7;
+}
+
+/* ── SIGN 2: CHEAP STRING BANNER ── */
+.sign-banner-wrap {
+  align-self: center;
+  width: 100%;
+  position: relative;
+  margin-bottom: -4px;
+  z-index: 10;
+  padding: 0 10px;
+}
+
+.banner-strings {
+  display: flex;
+  justify-content: space-between;
+  padding: 0 20px;
+  margin-bottom: -2px;
+}
+
+.banner-string {
+  width: 1px;
+  height: 20px;
+  background: linear-gradient(to bottom, rgba(180,140,80,0.6), rgba(180,140,80,0.3));
+  position: relative;
+}
+
+.banner-string::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -15px;
+  right: -15px;
+  height: 1px;
+  background: rgba(180,140,80,0.4);
+}
+
+.banner-main {
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  gap: 2px;
+}
+
+.banner-flag {
+  padding: 6px 8px;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.1rem;
+  position: relative;
+}
+
+.banner-flag:nth-child(odd) {
+  transform: rotate(-2deg);
+  background: #44cc44;
+  color: #001100;
+  clip-path: polygon(0 0, 100% 0, 100% 80%, 50% 100%, 0 80%);
+}
+
+.banner-flag:nth-child(even) {
+  transform: rotate(2deg);
+  background: #22aa22;
+  color: #ccffcc;
+  clip-path: polygon(0 0, 100% 0, 100% 80%, 50% 100%, 0 80%);
+}
+
+.banner-subtitle {
+  font-family: var(--font-mono);
+  font-size: 0.55rem;
+  color: rgba(100,200,100,0.7);
+  text-align: center;
+  letter-spacing: 0.2em;
+  margin-top: 4px;
+  transform: rotate(1deg);
+  display: block;
+}
+
+/* ── SIGN 3: NEON ELECTRIC SIGN ── */
+.sign-neon-wrap {
+  align-self: flex-end;
+  margin-bottom: -6px;
+  z-index: 10;
+  transform: rotate(-2deg);
+}
+
+.sign-neon-box {
+  background: #0a0a0a;
+  border: 2px solid #333;
+  padding: 10px 16px;
+  position: relative;
+  box-shadow:
+    0 0 0 1px #444,
+    4px 4px 0 #222,
+    inset 0 0 30px rgba(0,0,0,0.8);
+}
+
+/* Mounting screws */
+.sign-neon-box::before {
+  content: '◉ ◉';
+  position: absolute;
+  top: 3px;
+  left: 0; right: 0;
+  text-align: center;
+  font-size: 0.4rem;
+  color: #555;
+  letter-spacing: 80px;
+}
+
+.neon-line-1 {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 0.75rem;
+  letter-spacing: 0.4em;
+  color: #aacc22;
+  text-shadow:
+    0 0 5px #aacc22,
+    0 0 15px #aacc22,
+    0 0 30px #88aa00,
+    0 0 60px #668800;
+  display: block;
+  animation: neonFlicker 4s infinite;
+}
+
+.neon-line-2 {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.4rem;
+  letter-spacing: 0.15em;
+  color: #ccee44;
+  text-shadow:
+    0 0 5px #ccee44,
+    0 0 15px #aacc22,
+    0 0 30px #88aa00,
+    0 0 80px #668800;
+  display: block;
+  animation: neonFlicker 4s infinite 0.5s;
+}
+
+.neon-line-3 {
+  font-family: var(--font-mono);
+  font-size: 0.55rem;
+  letter-spacing: 0.3em;
+  color: #888;
+  display: block;
+  margin-top: 2px;
+}
+
+/* Neon wire coming out top */
+.sign-neon-box::after {
+  content: '';
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  width: 2px;
+  height: 12px;
+  background: #333;
+}
+
+/* ── PORTAL CANVAS ── */
+.portal-canvas-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 280px;
+  height: 340px;
+}
+
+.portal-canvas {
+  filter: drop-shadow(0 0 20px var(--portal-glow));
+}
+
+.portal-canvas-wrap.blue-portal  { --portal-glow: rgba(60,120,255,0.9); }
+.portal-canvas-wrap.green-portal { --portal-glow: rgba(50,220,50,0.9); }
+.portal-canvas-wrap.olive-portal { --portal-glow: rgba(160,210,30,0.9); }
+
+/* ── PORTAL INFO ── */
+.portal-info {
+  text-align: center;
+  padding: 1.5rem 1rem 0.5rem;
+}
+
+.portal-title {
+  font-family: var(--font-display);
+  font-size: 1.8rem;
+  color: var(--white-cold);
+  margin-bottom: 0.75rem;
+}
+
+.portal-desc {
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  color: var(--white-dim);
+  line-height: 1.7;
+  margin-bottom: 1.25rem;
+}
+
+.portal-cta {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.2em;
+  padding: 0.5rem 1.5rem;
+  border: 1px solid;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+}
+
+.portal-cta-blue  { color: #4488ff; border-color: #4488ff; }
+.portal-cta-blue:hover  { background: #4488ff; color: #000; box-shadow: 0 0 25px #4488ff; }
+.portal-cta-green { color: #44cc44; border-color: #44cc44; }
+.portal-cta-green:hover { background: #44cc44; color: #000; box-shadow: 0 0 25px #44cc44; }
+.portal-cta-olive { color: #aacc22; border-color: #aacc22; }
+.portal-cta-olive:hover { background: #aacc22; color: #000; box-shadow: 0 0 25px #aacc22; }
+
+/* ── ANIMATIONS ── */
+@keyframes neonFlicker {
+  0%, 100% { opacity: 1; }
+  91% { opacity: 1; }
+  92% { opacity: 0.4; }
+  93% { opacity: 1; }
+  95% { opacity: 0.7; }
+  96% { opacity: 1; }
+}
+
+@keyframes flicker {
+  0%, 100% { opacity: 1; }
+  92% { opacity: 1; }
+  93% { opacity: 0.3; }
+  94% { opacity: 1; }
+  96% { opacity: 0.5; }
+  97% { opacity: 1; }
+}
+
+@media (max-width: 768px) {
+  .portals-grid { grid-template-columns: 1fr; }
+}
