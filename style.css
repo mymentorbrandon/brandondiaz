@@ -158,7 +158,7 @@ body {
 
 .scroll-hint span {
   font-family: var(--font-mono);
-  font-size: 0.6rem;
+  font-size: 0.75rem;
   color: var(--matrix-dim);
   letter-spacing: 0.3em;
 }
@@ -510,7 +510,7 @@ footer p {
   width: 115%;
   padding: 6px 0;
   font-family: var(--font-mono);
-  font-size: 0.6rem;
+  font-size: 0.75rem;
   letter-spacing: 0.15em;
   text-align: center;
   white-space: nowrap;
@@ -557,8 +557,8 @@ footer p {
     #ffdd00 0px, #ffdd00 30px,
     #111100 30px, #111100 60px
   );
-  color: #111100;
-  text-shadow: none;
+  color: #ffffff;
+  text-shadow: 1px 1px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000;
 }
 
 .caution-bottom {
@@ -567,7 +567,8 @@ footer p {
     #ffdd00 0px, #ffdd00 30px,
     #111100 30px, #111100 60px
   );
-  color: #111100;
+  color: #ffffff;
+  text-shadow: 1px 1px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000;
 }
 
 .caution-bio {
@@ -576,7 +577,8 @@ footer p {
     #22ee22 0px, #22ee22 30px,
     #001100 30px, #001100 60px
   ) !important;
-  color: #001100 !important;
+  color: #ffffff !important;
+  text-shadow: 1px 1px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000;
 }
 
 .caution-danger {
@@ -585,7 +587,8 @@ footer p {
     #ee2200 0px, #ee2200 30px,
     #110000 30px, #110000 60px
   ) !important;
-  color: #ffaa00 !important;
+  color: #ffffff !important;
+  text-shadow: 1px 1px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000;
 }
 
 /* ── SIGN 1: MORTY'S SLOPPY WOOD SIGN ── */
@@ -595,40 +598,26 @@ footer p {
   align-items: flex-end;
   margin-bottom: -6px;
   z-index: 10;
-  transform: rotate(4deg);
+  transform: rotate(5deg);
 }
 
 .sign-morty-post {
-  width: 8px;
-  height: 65px;
+  width: 10px;
+  height: 80px;
   background: linear-gradient(to bottom, #8B6535, #5a3d15, #3d2a0a);
-  border-radius: 1px 1px 3px 3px;
-  position: relative;
+  border-radius: 2px 2px 4px 4px;
   flex-shrink: 0;
-}
-
-.sign-morty-post::after {
-  content: '';
-  position: absolute;
-  top: 10px;
-  left: -1px;
-  right: -1px;
-  height: 3px;
-  background: #3d2a0a;
-  border-radius: 1px;
 }
 
 .sign-morty-board {
   background: linear-gradient(135deg, #8B6535 0%, #6b4a1f 40%, #7a5528 70%, #5a3d15 100%);
-  border: none;
-  padding: 10px 14px;
+  padding: 14px 20px;
   position: relative;
-  max-width: 140px;
-  box-shadow: 3px 3px 8px rgba(0,0,0,0.8), inset 0 0 20px rgba(0,0,0,0.3);
-  transform: rotate(-2deg);
+  max-width: 220px;
+  box-shadow: 4px 4px 12px rgba(0,0,0,0.9), inset 0 0 30px rgba(0,0,0,0.4);
+  transform: rotate(-3deg);
 }
 
-/* Wood grain texture */
 .sign-morty-board::before {
   content: '';
   position: absolute;
@@ -636,49 +625,41 @@ footer p {
   background: repeating-linear-gradient(
     92deg,
     transparent 0px,
-    transparent 8px,
-    rgba(0,0,0,0.08) 8px,
-    rgba(0,0,0,0.08) 9px
+    transparent 10px,
+    rgba(0,0,0,0.07) 10px,
+    rgba(0,0,0,0.07) 11px
   );
-}
-
-/* Nail holes */
-.sign-morty-board::after {
-  content: '• •';
-  position: absolute;
-  top: 4px;
-  left: 0; right: 0;
-  text-align: center;
-  font-size: 0.4rem;
-  color: rgba(0,0,0,0.5);
-  letter-spacing: 60px;
+  pointer-events: none;
 }
 
 .sign-morty-text {
   font-family: 'Bebas Neue', sans-serif;
-  font-size: 1.1rem;
-  line-height: 1.15;
+  font-size: 2.2rem;
+  line-height: 1.1;
   position: relative;
   z-index: 1;
-  /* Sloppy green paint */
   color: #44dd44;
   text-shadow:
-    1px 1px 0 #22aa22,
-    -1px 0px 0 #33cc33,
-    2px -1px 0 #55ee44,
-    0 2px 4px rgba(0,100,0,0.5);
-  transform: rotate(-1deg);
+    2px 2px 0 #22aa22,
+    -2px 1px 0 #33cc33,
+    3px -2px 0 #55ee44,
+    -1px -1px 0 #11aa11,
+    0 3px 8px rgba(0,180,0,0.6),
+    0 0 20px rgba(0,255,0,0.3);
   display: block;
-  filter: url(#sloppy);
+  transform: rotate(-1deg) skew(-2deg);
+  letter-spacing: 0.05em;
 }
 
 .sign-morty-text .drip {
-  font-size: 0.5rem;
+  font-size: 0.8rem;
   color: #33cc33;
   display: block;
-  margin-top: -4px;
-  letter-spacing: 0.1em;
-  opacity: 0.7;
+  margin-top: -2px;
+  letter-spacing: 0.15em;
+  opacity: 0.85;
+  text-shadow: 0 0 8px #00ff00;
+  transform: rotate(1deg);
 }
 
 /* ── SIGN 2: CHEAP STRING BANNER ── */
