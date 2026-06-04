@@ -49,16 +49,8 @@ async function drawPortal(canvasId, colors, imageSrc, parallaxMode) {
   function getParallaxOffset() {
     const strength = 35;
 
-    if (parallaxMode === 'mouse') {
-      // Portal 2 — follows mouse across whole screen
-      return {
-        x: mouseX * strength,
-        y: mouseY * strength
-      };
-    }
-
-    if (parallaxMode === 'proximity') {
-      // Portal 1 — reacts when cursor is near the portal
+    if (parallaxMode === 'breathe') {
+      // Portal 1 — breathes toward cursor when hovering
       const rect = canvas.getBoundingClientRect();
       const portalCenterX = rect.left + rect.width / 2;
       const portalCenterY = rect.top + rect.height / 2;
@@ -67,22 +59,30 @@ async function drawPortal(canvasId, colors, imageSrc, parallaxMode) {
       const distX = cursorX - portalCenterX;
       const distY = cursorY - portalCenterY;
       const dist = Math.sqrt(distX * distX + distY * distY);
-      const maxDist = 400;
+      const maxDist = 350;
       const influence = Math.max(0, 1 - dist / maxDist);
+      // Breathe scale stored on canvas
+      canvas._breatheInfluence = influence;
       return {
-        x: (distX / maxDist) * strength * 2 * influence,
-        y: (distY / maxDist) * strength * 2 * influence
+        x: (distX / maxDist) * strength * influence,
+        y: (distY / maxDist) * strength * influence
+      };
+    }
+
+    if (parallaxMode === 'heartbeat') {
+      // Portal 2 — heartbeat rhythm shifts the galaxy
+      const beat = canvas._heartbeat || 0;
+      return {
+        x: Math.sin(beat * 3.2) * 12,
+        y: Math.cos(beat * 1.6) * 8
       };
     }
 
     if (parallaxMode === 'scroll') {
-      // Portal 3 — moves as page scrolls
-      const rect = canvas.getBoundingClientRect();
-      const portalMidpoint = rect.top + rect.height / 2 + scrollY;
-      const scrollOffset = (scrollY - portalMidpoint * 0.3) * 0.15;
+      const scrollSpeed = scrollY * 0.004;
       return {
-        x: Math.sin(scrollY * 0.003) * strength,
-        y: scrollOffset
+        x: Math.sin(scrollSpeed) * 20,
+        y: Math.cos(scrollSpeed * 0.7) * 15
       };
     }
 
@@ -106,17 +106,33 @@ async function drawPortal(canvasId, colors, imageSrc, parallaxMode) {
       smoothOffsetX += (target.x - smoothOffsetX) * 0.06;
       smoothOffsetY += (target.y - smoothOffsetY) * 0.06;
 
-      const pad = 50;
+      const pad = 60;
       const imgAspect = bgImage.width / bgImage.height;
       const canvasAspect = W / H;
       let drawW, drawH;
 
-      if (imgAspect > canvasAspect) {
-        drawH = H + pad * 2;
-        drawW = drawH * imgAspect;
+      // Heartbeat portal uses CONTAIN mode — show full image
+      // All others use COVER mode — fill the portal
+      if (parallaxMode === 'heartbeat' || parallaxMode === 'scroll') {
+        // Fit entire image inside portal with padding
+        if (imgAspect > canvasAspect) {
+          drawW = W * 0.95;
+          drawH = drawW / imgAspect;
+        } else {
+          drawH = H * 0.95;
+          drawW = drawH * imgAspect;
+        }
       } else {
-        drawW = W + pad * 2;
-        drawH = drawW / imgAspect;
+        // Cover mode — fill completely
+        if (imgAspect > canvasAspect) {
+          drawH = H + pad * 2;
+          drawW = drawH * imgAspect;
+        } else {
+          drawW = W + pad * 2;
+          drawH = drawW / imgAspect;
+        }
+        if (drawW < W + pad * 2) { drawW = W + pad * 2; drawH = drawW / imgAspect; }
+        if (drawH < H + pad * 2) { drawH = H + pad * 2; drawW = drawH * imgAspect; }
       }
 
       const drawX = (W - drawW) / 2 + smoothOffsetX;
@@ -125,8 +141,13 @@ async function drawPortal(canvasId, colors, imageSrc, parallaxMode) {
       ctx.drawImage(bgImage, drawX, drawY, drawW, drawH);
     }
 
-    // Dark overlay so swirl reads clearly
-    ctx.fillStyle = 'rgba(0,0,0,0.42)';
+    // Radial fade — bright center, dark edges so image blends in
+    const fadeGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, Math.max(rx, ry));
+    fadeGrad.addColorStop(0, 'rgba(0,0,0,0.0)');
+    fadeGrad.addColorStop(0.5, 'rgba(0,0,0,0.15)');
+    fadeGrad.addColorStop(0.8, 'rgba(0,0,0,0.55)');
+    fadeGrad.addColorStop(1, 'rgba(0,0,0,0.92)');
+    ctx.fillStyle = fadeGrad;
     ctx.fillRect(0, 0, W, H);
 
     // ── SWIRL RINGS ──
@@ -207,16 +228,72 @@ async function drawPortal(canvasId, colors, imageSrc, parallaxMode) {
       else ctx.lineTo(x, y);
     }
     ctx.closePath();
+    // Outer soft glow fade — multiple passes getting more transparent
+    const glowLayers = [
+      { width: 40, alpha: 0.04 },
+      { width: 28, alpha: 0.07 },
+      { width: 18, alpha: 0.12 },
+      { width: 10, alpha: 0.20 },
+      { width: 5,  alpha: 0.35 },
+    ];
+
+    glowLayers.forEach(layer => {
+      ctx.lineWidth = layer.width;
+      ctx.strokeStyle = colors.edge;
+      ctx.globalAlpha = layer.alpha;
+      ctx.shadowColor = colors.glow;
+      ctx.shadowBlur = 40;
+      ctx.stroke();
+    });
+
+    // Main bright edge
+    ctx.globalAlpha = 1;
     ctx.strokeStyle = colors.edge;
-    ctx.lineWidth = 6;
+    ctx.lineWidth = 5;
     ctx.shadowColor = colors.glow;
-    ctx.shadowBlur = 25;
+    ctx.shadowBlur = 20;
     ctx.stroke();
-    ctx.lineWidth = 2;
+
+    // Inner white highlight
+    ctx.lineWidth = 1.5;
     ctx.strokeStyle = '#ffffff';
-    ctx.globalAlpha = 0.3;
+    ctx.globalAlpha = 0.25;
+    ctx.shadowBlur = 0;
     ctx.stroke();
+
     ctx.restore();
+
+    // ── BREATHE SCALE on portal 1 ──
+    if (parallaxMode === 'breathe') {
+      const influence = canvas._breatheInfluence || 0;
+      const breatheScale = 1 + Math.sin(time * 1.2) * 0.015 * (1 + influence * 3);
+      canvas.style.transform = `scale(${breatheScale})`;
+    }
+
+    // ── HEARTBEAT on portal 2 ──
+    if (parallaxMode === 'heartbeat') {
+      if (!canvas._heartbeat) canvas._heartbeat = 0;
+      canvas._heartbeat += 0.035;
+
+      // Heartbeat lub-dub rhythm — two quick beats then pause
+      const beat = canvas._heartbeat;
+      const cycle = beat % (Math.PI * 2);
+      const lub = Math.exp(-Math.pow((cycle - 0.3) / 0.15, 2));
+      const dub = Math.exp(-Math.pow((cycle - 0.7) / 0.12, 2)) * 0.7;
+      const pulse = (lub + dub) * 0.12;
+      canvas.style.transform = `scale(${1 + pulse})`;
+      canvas.style.filter = `drop-shadow(0 0 ${20 + pulse * 200}px #33cc33)`;
+    }
+
+    // ── SCROLL SURGE on portal 3 ──
+    if (parallaxMode === 'scroll') {
+      const scrollDelta = Math.abs(scrollY - (canvas._lastScroll || 0));
+      canvas._lastScroll = scrollY;
+      const surge = Math.min(scrollDelta * 0.02, 0.04);
+      canvas._scrollSurge = (canvas._scrollSurge || 0) * 0.92 + surge;
+      canvas.style.transform = `scale(${1 + canvas._scrollSurge})`;
+      canvas.style.filter = `drop-shadow(0 0 ${20 + canvas._scrollSurge * 60}px #aacc22)`;
+    }
 
     angle += 0.010;
     time += 0.025;
@@ -237,7 +314,7 @@ function hexToRgb(hex) {
 
 document.addEventListener('DOMContentLoaded', () => {
 
-  // Portal 1 — proximity (reacts when you get close)
+  // Portal 1 — breathes toward cursor on hover
   drawPortal('portal-blue', {
     dark:   '#010a1a',
     outer:  '#0a2a88',
@@ -246,9 +323,9 @@ document.addEventListener('DOMContentLoaded', () => {
     core:   '#aaccff',
     edge:   '#4488ff',
     glow:   '#4488ff',
-  }, 'images/purplegalxy.jpg', 'proximity');
+  }, 'images/greengalaxy.jpg', 'breathe');
 
-  // Portal 2 — mouse (follows cursor everywhere)
+  // Portal 2 — heartbeat rhythm
   drawPortal('portal-green', {
     dark:   '#010e01',
     outer:  '#0a5511',
@@ -257,7 +334,7 @@ document.addEventListener('DOMContentLoaded', () => {
     core:   '#aaffaa',
     edge:   '#33cc33',
     glow:   '#33cc33',
-  }, 'images/greengalaxy.jpg', 'mouse');
+  }, 'images/skelton.webp', 'heartbeat');
 
   // Portal 3 — scroll (moves as you scroll up and down)
   drawPortal('portal-olive', {
@@ -268,6 +345,6 @@ document.addEventListener('DOMContentLoaded', () => {
     core:   '#eeff99',
     edge:   '#aacc22',
     glow:   '#aacc22',
-  }, 'images/redgalaxy.jpg', 'scroll');
+  }, 'images/digitalhouse.jpg', 'scroll');
 
 });
