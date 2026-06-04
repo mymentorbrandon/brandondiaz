@@ -822,10 +822,14 @@ footer p {
   justify-content: center;
   width: 280px;
   height: 340px;
+  overflow: hidden;
+  border-radius: 50%;
 }
 
 .portal-canvas {
   filter: drop-shadow(0 0 20px var(--portal-glow));
+  border-radius: 50%;
+  overflow: hidden;
 }
 
 .portal-canvas-wrap.blue-portal  { --portal-glow: rgba(60,120,255,0.9); }

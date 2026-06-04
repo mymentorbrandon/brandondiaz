@@ -1,6 +1,34 @@
-// portal.js v3 — More oval Rick & Morty portals
+// portal.js v5 — Three different parallax interactions per portal
 
-function drawPortal(canvasId, colors) {
+// ── SHARED TRACKERS ──
+let mouseX = 0;
+let mouseY = 0;
+let scrollY = 0;
+
+window.addEventListener('mousemove', (e) => {
+  mouseX = (e.clientX / window.innerWidth - 0.5) * 2;
+  mouseY = (e.clientY / window.innerHeight - 0.5) * 2;
+});
+
+window.addEventListener('scroll', () => {
+  scrollY = window.scrollY;
+});
+
+function loadImage(src) {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = () => resolve(null);
+    img.src = src;
+  });
+}
+
+// ── PARALLAX MODES ──
+// 'mouse'    — follows cursor across whole screen (portal 2)
+// 'proximity' — reacts when cursor gets close to portal (portal 1)
+// 'scroll'   — moves as page scrolls up and down (portal 3)
+
+async function drawPortal(canvasId, colors, imageSrc, parallaxMode) {
   const canvas = document.getElementById(canvasId);
   if (!canvas) return;
   const ctx = canvas.getContext('2d');
@@ -8,31 +36,97 @@ function drawPortal(canvasId, colors) {
   const H = canvas.height;
   const cx = W / 2;
   const cy = H / 2;
-  const rx = W * 0.42;  // horizontal radius
-  const ry = H * 0.48;  // vertical radius — taller = more oval
+  const rx = W * 0.42;
+  const ry = H * 0.48;
+
+  const bgImage = await loadImage(imageSrc);
 
   let angle = 0;
   let time = 0;
+  let smoothOffsetX = 0;
+  let smoothOffsetY = 0;
 
-  // Clip everything to the oval
-  function setOvalClip() {
-    ctx.beginPath();
-    ctx.ellipse(cx, cy, rx * 0.97, ry * 0.97, 0, 0, Math.PI * 2);
-    ctx.clip();
+  function getParallaxOffset() {
+    const strength = 35;
+
+    if (parallaxMode === 'mouse') {
+      // Portal 2 — follows mouse across whole screen
+      return {
+        x: mouseX * strength,
+        y: mouseY * strength
+      };
+    }
+
+    if (parallaxMode === 'proximity') {
+      // Portal 1 — reacts when cursor is near the portal
+      const rect = canvas.getBoundingClientRect();
+      const portalCenterX = rect.left + rect.width / 2;
+      const portalCenterY = rect.top + rect.height / 2;
+      const cursorX = (mouseX * 0.5 + 0.5) * window.innerWidth;
+      const cursorY = (mouseY * 0.5 + 0.5) * window.innerHeight;
+      const distX = cursorX - portalCenterX;
+      const distY = cursorY - portalCenterY;
+      const dist = Math.sqrt(distX * distX + distY * distY);
+      const maxDist = 400;
+      const influence = Math.max(0, 1 - dist / maxDist);
+      return {
+        x: (distX / maxDist) * strength * 2 * influence,
+        y: (distY / maxDist) * strength * 2 * influence
+      };
+    }
+
+    if (parallaxMode === 'scroll') {
+      // Portal 3 — moves as page scrolls
+      const rect = canvas.getBoundingClientRect();
+      const portalMidpoint = rect.top + rect.height / 2 + scrollY;
+      const scrollOffset = (scrollY - portalMidpoint * 0.3) * 0.15;
+      return {
+        x: Math.sin(scrollY * 0.003) * strength,
+        y: scrollOffset
+      };
+    }
+
+    return { x: 0, y: 0 };
   }
 
   function drawFrame() {
     ctx.clearRect(0, 0, W, H);
 
+    // ── OVAL CLIP ──
     ctx.save();
-    setOvalClip();
+    ctx.beginPath();
+    ctx.ellipse(cx, cy, rx * 0.90, ry * 0.90, 0, 0, Math.PI * 2);
+    ctx.clip();
 
-    // ── BACKGROUND ──
-    const bg = ctx.createRadialGradient(cx, cy, 0, cx, cy, Math.max(rx, ry));
-    bg.addColorStop(0, colors.core + '33');
-    bg.addColorStop(0.4, colors.dark);
-    bg.addColorStop(1, '#000000');
-    ctx.fillStyle = bg;
+    // ── GALAXY BACKGROUND WITH PARALLAX ──
+    if (bgImage) {
+      const target = getParallaxOffset();
+
+      // Smooth the movement so it feels fluid
+      smoothOffsetX += (target.x - smoothOffsetX) * 0.06;
+      smoothOffsetY += (target.y - smoothOffsetY) * 0.06;
+
+      const pad = 50;
+      const imgAspect = bgImage.width / bgImage.height;
+      const canvasAspect = W / H;
+      let drawW, drawH;
+
+      if (imgAspect > canvasAspect) {
+        drawH = H + pad * 2;
+        drawW = drawH * imgAspect;
+      } else {
+        drawW = W + pad * 2;
+        drawH = drawW / imgAspect;
+      }
+
+      const drawX = (W - drawW) / 2 + smoothOffsetX;
+      const drawY = (H - drawH) / 2 + smoothOffsetY;
+
+      ctx.drawImage(bgImage, drawX, drawY, drawW, drawH);
+    }
+
+    // Dark overlay so swirl reads clearly
+    ctx.fillStyle = 'rgba(0,0,0,0.42)';
     ctx.fillRect(0, 0, W, H);
 
     // ── SWIRL RINGS ──
@@ -42,8 +136,8 @@ function drawPortal(canvasId, colors) {
       const ringRx = rx * 0.95 * t;
       const ringRy = ry * 0.95 * t;
       const swirl = angle * (1 + t * 0.5) + i * 0.3;
-      const alpha = 0.12 + (1 - t) * 0.55;
-      const width = t < 0.2 ? 1 : t * 5;
+      const alpha = 0.1 + (1 - t) * 0.45;
+      const width = t < 0.2 ? 1 : t * 4;
 
       const r1 = hexToRgb(colors.outer);
       const r2 = hexToRgb(colors.inner);
@@ -77,7 +171,7 @@ function drawPortal(canvasId, colors) {
         else ctx.lineTo(x, y);
       }
       const rgb = hexToRgb(colors.spiral);
-      ctx.strokeStyle = `rgba(${rgb.r},${rgb.g},${rgb.b},0.2)`;
+      ctx.strokeStyle = `rgba(${rgb.r},${rgb.g},${rgb.b},0.18)`;
       ctx.lineWidth = 1.5;
       ctx.stroke();
       ctx.restore();
@@ -94,9 +188,9 @@ function drawPortal(canvasId, colors) {
     ctx.fillStyle = core;
     ctx.fill();
 
-    ctx.restore(); // end oval clip
+    ctx.restore(); // end clip
 
-    // ── BUBBLY EDGE (outside clip) ──
+    // ── BUBBLY EDGE ──
     ctx.save();
     ctx.beginPath();
     const bubblePoints = 80;
@@ -118,8 +212,6 @@ function drawPortal(canvasId, colors) {
     ctx.shadowColor = colors.glow;
     ctx.shadowBlur = 25;
     ctx.stroke();
-
-    // Second edge pass for glow thickness
     ctx.lineWidth = 2;
     ctx.strokeStyle = '#ffffff';
     ctx.globalAlpha = 0.3;
@@ -145,7 +237,7 @@ function hexToRgb(hex) {
 
 document.addEventListener('DOMContentLoaded', () => {
 
-  // BLUE — Web Design
+  // Portal 1 — proximity (reacts when you get close)
   drawPortal('portal-blue', {
     dark:   '#010a1a',
     outer:  '#0a2a88',
@@ -154,9 +246,9 @@ document.addEventListener('DOMContentLoaded', () => {
     core:   '#aaccff',
     edge:   '#4488ff',
     glow:   '#4488ff',
-  });
+  }, 'images/purplegalxy.jpg', 'proximity');
 
-  // GREEN — Health (classic Rick & Morty green)
+  // Portal 2 — mouse (follows cursor everywhere)
   drawPortal('portal-green', {
     dark:   '#010e01',
     outer:  '#0a5511',
@@ -165,9 +257,9 @@ document.addEventListener('DOMContentLoaded', () => {
     core:   '#aaffaa',
     edge:   '#33cc33',
     glow:   '#33cc33',
-  });
+  }, 'images/greengalaxy.jpg', 'mouse');
 
-  // OLIVE — Consulting
+  // Portal 3 — scroll (moves as you scroll up and down)
   drawPortal('portal-olive', {
     dark:   '#070c00',
     outer:  '#4a6600',
@@ -176,6 +268,6 @@ document.addEventListener('DOMContentLoaded', () => {
     core:   '#eeff99',
     edge:   '#aacc22',
     glow:   '#aacc22',
-  });
+  }, 'images/redgalaxy.jpg', 'scroll');
 
 });
